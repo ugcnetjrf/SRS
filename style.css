@@ -1,81 +1,90 @@
-// --- Helper to get current date in YYYY-MM-DD format
-function getCurrentDate() {
-  const d = new Date();
-  return d.toISOString().split('T')[0];
-}
-
-// --- Load tasks from localStorage
-function loadTasks() {
-  return JSON.parse(localStorage.getItem('tasks')) || {};
-}
-
-// --- Save tasks to localStorage
-function saveTasks(tasks) {
-  localStorage.setItem('tasks', JSON.stringify(tasks));
-}
-
-// --- Render tasks grouped by date
-function displayTasks() {
-  const container = document.getElementById('task-container');
-  container.innerHTML = '';
-
-  const tasks = loadTasks();
-  const dates = Object.keys(tasks).sort().reverse();
-
-  for (const date of dates) {
-    const section = document.createElement('div');
-    section.classList.add('date-header');
-    section.textContent = date;
-    container.appendChild(section);
-
-    const taskList = document.createElement('div');
-    taskList.classList.add('task-list');
-
-    tasks[date].forEach((task, index) => {
-      const item = document.createElement('div');
-      item.className = 'task-item';
-      if (task.done) item.classList.add('completed');
-      item.textContent = task.text;
-
-      // Show full content when clicked
-      item.addEventListener('click', () => {
-        alert(`Task: ${task.text}\nDate: ${date}`);
-      });
-
-      // Toggle done/undone on swipe or double click
-      item.addEventListener('dblclick', () => {
-        task.done = !task.done;
-        saveTasks(tasks);
-        displayTasks();
-      });
-
-      taskList.appendChild(item);
-    });
-
-    container.appendChild(taskList);
-  }
-}
-
-// --- Add new task
-document.getElementById('add-task').addEventListener('click', () => {
-  const taskInput = document.getElementById('task-input');
-  const dateInput = document.getElementById('task-date');
-  const taskText = taskInput.value.trim();
-  const selectedDate = dateInput.value || getCurrentDate();
-
-  if (!taskText) return;
-
-  const tasks = loadTasks();
-  if (!tasks[selectedDate]) tasks[selectedDate] = [];
-  tasks[selectedDate].push({ text: taskText, done: false });
-
-  saveTasks(tasks);
-  taskInput.value = '';
-  displayTasks();
-});
-
-// --- Set default date in date input to today
-document.getElementById('task-date').value = getCurrentDate();
-
-// --- Initial render
-displayTasks();
+body {
+     font-family: Arial, sans-serif;
+     background-color: #f4f4f4;
+     margin: 0;
+     padding: 0;
+     display: flex;
+     justify-content: center;
+     align-items: center;
+     height: 100vh;
+ }
+ 
+ .container {
+     background-color: white;
+     border-radius: 8px;
+     padding: 20px;
+     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+     width: 80%;
+     max-width: 800px;
+ }
+ 
+ h1 {
+     text-align: center;
+     color: #333;
+ }
+ 
+ .task-section, .revision-section, .download-section {
+     margin-top: 20px;
+ }
+ 
+ #task-input-section {
+     display: flex;
+     margin-bottom: 10px;
+ }
+ 
+ #task-input {
+     padding: 8px;
+     font-size: 16px;
+     flex-grow: 1;
+     margin-right: 10px;
+     border: 1px solid #ddd;
+     border-radius: 4px;
+ }
+ 
+ #add-task {
+     padding: 8px 16px;
+     background-color: #28a745;
+     color: white;
+     border: none;
+     border-radius: 4px;
+     cursor: pointer;
+ }
+ 
+ #add-task:hover {
+     background-color: #218838;
+ }
+ 
+ ul {
+     list-style-type: none;
+     padding: 0;
+ }
+ 
+ li {
+     padding: 8px;
+     background-color: #f8f9fa;
+     margin-bottom: 5px;
+     border-radius: 4px;
+     border: 1px solid #ddd;
+ }
+ 
+ .revision li {
+     background-color: #ffeeba;
+ }
+ 
+ .download-section {
+     text-align: center;
+     margin-top: 30px;
+ }
+ 
+ #download-tasks {
+     padding: 8px 16px;
+     background-color: #007bff;
+     color: white;
+     border: none;
+     border-radius: 4px;
+     cursor: pointer;
+ }
+ 
+ #download-tasks:hover {
+     background-color: #0056b3;
+ }
