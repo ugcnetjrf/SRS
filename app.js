@@ -27,8 +27,9 @@ function addDays(dateStr, days) {
 
 function displayTasks() {
   const container = document.getElementById('task-container');
-  container.innerHTML = '';
+  if (!container) return;
 
+  container.innerHTML = '';
   const tasks = loadTasks();
   const dates = Object.keys(tasks).sort().reverse();
 
@@ -60,8 +61,9 @@ function displayTasks() {
 
 function displayRevisionTasks() {
   const container = document.getElementById('revision-container');
-  container.innerHTML = '';
+  if (!container) return;
 
+  container.innerHTML = '';
   const today = getCurrentDate();
   const intervals = [1, 3, 7, 14, 21];
   const tasks = loadTasks();
@@ -99,26 +101,31 @@ function displayRevisionTasks() {
   }
 }
 
-document.getElementById('add-task').addEventListener('click', () => {
-  const taskInput = document.getElementById('task-input');
-  const dateInput = document.getElementById('task-date');
-  const taskText = taskInput.value.trim();
-  const selectedDate = dateInput.value || getCurrentDate();
+function setupEventHandlers() {
+  const addTaskBtn = document.getElementById('add-task');
+  if (addTaskBtn) {
+    addTaskBtn.addEventListener('click', () => {
+      const taskInput = document.getElementById('task-input');
+      const dateInput = document.getElementById('task-date');
+      const taskText = taskInput.value.trim();
+      const selectedDate = dateInput.value || getCurrentDate();
 
-  if (!taskText) return;
+      if (!taskText) return;
 
-  const tasks = loadTasks();
-  if (!tasks[selectedDate]) tasks[selectedDate] = [];
-  tasks[selectedDate].push({ text: taskText, done: false });
+      const tasks = loadTasks();
+      if (!tasks[selectedDate]) tasks[selectedDate] = [];
+      tasks[selectedDate].push({ text: taskText, done: false });
 
-  saveTasks(tasks);
-  taskInput.value = '';
-  displayTasks();
-  displayRevisionTasks();
-});
+      saveTasks(tasks);
+      taskInput.value = '';
+      displayTasks();
+      displayRevisionTasks();
+    });
 
-document.getElementById('task-date').value = getCurrentDate();
+    document.getElementById('task-date').value = getCurrentDate();
+  }
+}
 
-// Initial load
+setupEventHandlers();
 displayTasks();
 displayRevisionTasks();
