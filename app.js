@@ -42,18 +42,26 @@ function displayTasks() {
       const item = document.createElement('div');
       item.className = 'task-item';
       if (task.done) item.classList.add('completed');
-      item.textContent = task.text;
 
-      item.addEventListener('click', () => {
+      const textSpan = document.createElement('span');
+      textSpan.textContent = task.text;
+      textSpan.style.flexGrow = '1';
+
+      textSpan.addEventListener('click', () => {
         alert(`Task: ${task.text}\nDate: ${date}`);
       });
 
-      item.addEventListener('dblclick', () => {
-        task.done = !task.done;
-        saveTasks(tasks);
-        displayTasks();
-      });
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = '🗑️';
+      deleteBtn.style.marginLeft = '10px';
+      deleteBtn.onclick = () => {
+        if (confirm("Delete this task completely?")) {
+          deleteSpecificTask(date, task.text);
+        }
+      };
 
+      item.appendChild(textSpan);
+      item.appendChild(deleteBtn);
       container.appendChild(item);
     });
   }
@@ -124,6 +132,53 @@ function setupEventHandlers() {
 
     document.getElementById('task-date').value = getCurrentDate();
   }
+}
+
+function downloadTasks() {
+  const tasks = loadTasks();
+  let output = 'All Tasks (Grouped by Date)\n\n';
+
+  for (const date in tasks) {
+    output += `Date: ${date}\n`;
+    tasks[date].forEach(task => {
+      output += `- ${task.text}\n`;
+    });
+    output += '\n';
+  }
+
+  const blob = new Blob([output], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'tasks_backup.txt';
+  a.click();
+}
+
+function resetAll() {
+  if (confirm("Are you sure you want to delete ALL tasks?")) {
+    localStorage.removeItem('tasks');
+    localStorage.removeItem('revisionStatus');
+    displayTasks();
+  }
+}
+
+function deleteSpecificTask(date, taskText) {
+  const tasks = loadTasks();
+  const revisionStatus = loadRevisionStatus();
+
+  // Remove from tasks
+  tasks[date] = tasks[date].filter(task => task.text !== taskText);
+  if (tasks[date].length === 0) delete tasks[date];
+
+  // Remove from spaced repetition schedule
+  const intervals = [1, 3, 7, 14, 21];
+  intervals.forEach(interval => {
+    const id = `${date}::${taskText}::${interval}`;
+    delete revisionStatus[id];
+  });
+
+  saveTasks(tasks);
+  saveRevisionStatus(revisionStatus);
+  displayTasks();
 }
 
 setupEventHandlers();
